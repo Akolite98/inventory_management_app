@@ -1,0 +1,17 @@
+# Ignore Python files
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual Environment
+venv/
+
+# Django Secret Key & Config Files (if any)
+.env
+
+# Database (for SQLite)
+db.sqlite3
+
+# VSCode & MacOS System Files
+.vscode/
+.DS_Store
