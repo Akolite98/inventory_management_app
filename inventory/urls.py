@@ -1,10 +1,11 @@
 from django.urls import path
 from inventory.views import RegisterUserView, LoginView, UserProfileView, LogoutView
 from inventory.views import InventoryListCreateView, InventoryDetailView
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 urlpatterns = [
     path("auth/register/", RegisterUserView.as_view(), name="register"),
-    path("auth/login/", LoginView.as_view(), name="login"),
+    path("auth/login/", TokenObtainPairView.as_view(), name="login"),
     path("auth/user/", UserProfileView.as_view(), name="user-profile"),
     path("auth/logout/", LogoutView.as_view(), name="logout"),
 
