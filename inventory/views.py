@@ -3,6 +3,8 @@ from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from inventory.serializers import UserSerializer
+from inventory.models import InventoryItem
+from inventory.serializers import InventorySerializer
 
 # User Registration
 class RegisterUserView(generics.CreateAPIView):
@@ -43,3 +45,20 @@ class LogoutView(generics.GenericAPIView):
             return Response({"message": "Logged out successfully"}, status=200)
         except Exception as e:
             return Response({"error": "Invalid token"}, status=400)
+
+class InventoryListCreateView(generics.ListCreateAPIView):
+    serializer_class = InventorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return InventoryItem.objects.filter(owner=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+class InventoryDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = InventorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return InventoryItem.objects.filter(owner=self.request.user)
