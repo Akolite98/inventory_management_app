@@ -2,6 +2,7 @@ from django.urls import path
 from inventory.views import RegisterUserView, LoginView, UserProfileView, LogoutView
 from inventory.views import InventoryListCreateView, InventoryDetailView
 from rest_framework_simplejwt.views import TokenObtainPairView
+from .views import LowStockItemsView, OutOfStockItemsView
 
 urlpatterns = [
     path("auth/register/", RegisterUserView.as_view(), name="register"),
@@ -12,4 +13,7 @@ urlpatterns = [
         # Inventory CRUD endpoints
     path("inventory/", InventoryListCreateView.as_view(), name="inventory-list"),
     path("inventory/<int:pk>/", InventoryDetailView.as_view(), name="inventory-detail"),
+
+    path('api/inventory/low-stock/', LowStockItemsView.as_view(), name='low_stock_items'),
+    path('api/inventory/out-of-stock/', OutOfStockItemsView.as_view(), name='out_of_stock_items'),
 ]
