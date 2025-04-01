@@ -3,6 +3,7 @@ from rest_framework import generics, permissions, filters
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from inventory import models
 from inventory.serializers import UserSerializer
 from inventory.models import InventoryItem
 from inventory.serializers import InventorySerializer
@@ -86,3 +87,24 @@ class InventoryDetailView(generics.RetrieveUpdateDestroyAPIView):
             return super().get_object()
         except InventoryItem.DoesNotExist:
             raise NotFound("The requested inventory item was not found.")
+        
+
+class LowStockItemsView(generics.ListAPIView):
+    """Retrieve all items that are low in stock."""
+    serializer_class = InventorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return InventoryItem.objects.filter(
+            owner=self.request.user,
+            quantity__lte=models.F('low_stock_threshold'),
+            quantity__gt=0
+        )
+
+class OutOfStockItemsView(generics.ListAPIView):
+    """Retrieve all out-of-stock items."""
+    serializer_class = InventorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return InventoryItem.objects.filter(owner=self.request.user, quantity=0)
