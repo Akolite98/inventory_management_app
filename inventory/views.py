@@ -8,6 +8,12 @@ from inventory.serializers import UserSerializer
 from inventory.models import InventoryItem
 from inventory.serializers import InventorySerializer
 from rest_framework.pagination import PageNumberPagination
+from django.db.models import Sum
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from .models import InventoryItem
+
+
 
 # User Registration
 class RegisterUserView(generics.CreateAPIView):
@@ -108,3 +114,17 @@ class OutOfStockItemsView(generics.ListAPIView):
 
     def get_queryset(self):
         return InventoryItem.objects.filter(owner=self.request.user, quantity=0)
+    
+class InventoryReportView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        total_items = InventoryItem.objects.filter(owner=request.user).count()
+        total_sold = InventoryItem.objects.filter(owner=request.user, quantity=0).count()
+        total_available = InventoryItem.objects.filter(owner=request.user).aggregate(Sum('quantity'))['quantity__sum'] or 0
+
+        return Response({
+            "total_items": total_items,
+            "total_sold": total_sold,
+            "total_available_stock": total_available
+        })
