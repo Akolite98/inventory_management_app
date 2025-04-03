@@ -9,6 +9,9 @@ class InventoryItem(models.Model):
     low_stock_threshold = models.PositiveIntegerField(default=5)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    class Meta:
+        ordering = ['id']
+
     def is_low_stock(self):
         return self.quantity > 0 and self.quantity <= self.low_stock_threshold
 

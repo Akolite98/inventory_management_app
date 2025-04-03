@@ -12,6 +12,8 @@ from django.db.models import Sum
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from .models import InventoryItem
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 
 
 
@@ -62,13 +64,15 @@ class InventoryPagination(PageNumberPagination):
 
 class InventoryListCreateView(generics.ListCreateAPIView):
     """Retrieve and create inventory items (with search and pagination)"""
+    queryset = InventoryItem.objects.all()
     serializer_class = InventorySerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = InventoryPagination
 
     # Enable search filtering
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['name', 'category']  # Allow searching by name and category
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_fields = ['quantity']
+    search_fields = ['name']
 
     def get_queryset(self):
         """Filter items belonging to the authenticated user"""

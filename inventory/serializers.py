@@ -15,7 +15,8 @@ class InventorySerializer(serializers.ModelSerializer):
 
 class Meta:
         model = InventoryItem
-        fields = ['id', 'name', 'quantity', 'price', 'low_stock_threshold', 'is_low_stock', 'is_out_of_stock']
+        fields = '__all__' 
+        # fields = ['id', 'name', 'quantity', 'price', 'low_stock_threshold', 'is_low_stock', 'is_out_of_stock']
 
 def get_is_low_stock(self, obj):
         return obj.is_low_stock()
