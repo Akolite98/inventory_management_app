@@ -50,7 +50,7 @@ REST_FRAMEWORK = {
         
     ),
    
-    'EXCEPTION_HANDLER': 'inventory_api.exceptions.custom_exception_handler'
+    'EXCEPTION_HANDLER': 'inventory.exceptions.custom_exception_handler'
 
 }
 
@@ -140,3 +140,4 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+

@@ -7,19 +7,17 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ["id", "username", "email"]
 
-        
 class InventorySerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source="owner.username")
     is_low_stock = serializers.SerializerMethodField()
     is_out_of_stock = serializers.SerializerMethodField()
 
-class Meta:
+    class Meta:
         model = InventoryItem
-        fields = '__all__' 
-        # fields = ['id', 'name', 'quantity', 'price', 'low_stock_threshold', 'is_low_stock', 'is_out_of_stock']
+        fields = '__all__'
 
-def get_is_low_stock(self, obj):
+    def get_is_low_stock(self, obj):
         return obj.is_low_stock()
 
-def get_is_out_of_stock(self, obj):
+    def get_is_out_of_stock(self, obj):
         return obj.is_out_of_stock()

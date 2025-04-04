@@ -1,9 +1,12 @@
+from venv import logger
+from django.db.models import F
 from django.contrib.auth.models import User
 from rest_framework import generics, permissions, filters
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from inventory import models
+from inventory import serializers
 from inventory.serializers import UserSerializer
 from inventory.models import InventoryItem
 from inventory.serializers import InventorySerializer
@@ -12,8 +15,11 @@ from django.db.models import Sum
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from .models import InventoryItem
+from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
+import logging
+logger = logging.getLogger(__name__)
 
 
 
@@ -21,6 +27,7 @@ from rest_framework.filters import SearchFilter
 class RegisterUserView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [permissions.AllowAny]  # Add this line
 
 # Login - Get JWT Token
 class LoginView(generics.GenericAPIView):
@@ -62,15 +69,14 @@ class InventoryPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 50
 
-class InventoryListCreateView(generics.ListCreateAPIView):
-    """Retrieve and create inventory items (with search and pagination)"""
-    queryset = InventoryItem.objects.all()
+class InventoryListView(generics.ListAPIView):
+    """Retrieve inventory items (with search and pagination)"""
     serializer_class = InventorySerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = InventoryPagination
 
     # Enable search filtering
-    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['quantity']
     search_fields = ['name']
 
@@ -78,9 +84,16 @@ class InventoryListCreateView(generics.ListCreateAPIView):
         """Filter items belonging to the authenticated user"""
         return InventoryItem.objects.filter(owner=self.request.user)
 
+
+class InventoryCreateView(generics.CreateAPIView):
+    """Create a new inventory item"""
+    serializer_class = InventorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
     def perform_create(self, serializer):
-        """Ensure the inventory item is saved with the authenticated user"""
         serializer.save(owner=self.request.user)
+
+
 
 class InventoryDetailView(generics.RetrieveUpdateDestroyAPIView):
     """Retrieve, update, or delete an inventory item with improved error handling"""
@@ -107,10 +120,9 @@ class LowStockItemsView(generics.ListAPIView):
     def get_queryset(self):
         return InventoryItem.objects.filter(
             owner=self.request.user,
-            quantity__lte=models.F('low_stock_threshold'),
+            quantity__lte=F('low_stock_threshold'),  # Use F() directly
             quantity__gt=0
         )
-
 class OutOfStockItemsView(generics.ListAPIView):
     """Retrieve all out-of-stock items."""
     serializer_class = InventorySerializer
